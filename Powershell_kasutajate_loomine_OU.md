@@ -4,6 +4,7 @@ Sisukord:
 * alguses tehakse käsud **käsureal**
 * alles lõpus pannakse kõik **skriptiks kokku**
 * iga sammu juures on **selgitus, miks ja mida tehakse**
+Selge! Ma asendan sinu olemasoleva **8️⃣ sammu – Foreach tsükkel** tervikuna praktilise ja testitava lahendusega, kus õpilane saab CSV-failist kasutajaid lugeda ja nende andmed käsureale väljastada. Samuti ühendame kõik sammud tervikuks nii, et dokument oleks kohe kasutatav õpiülesandena.
 
 ---
 
@@ -163,6 +164,8 @@ Mitme kasutaja loomine käsitsi on ebaefektiivne – kasutame CSV-d.
 ```csv
 FirstName,LastName,OU,Password
 Markus,Tamm,IT,Passw0rd
+Jüri,Sepp,IT,Pa$$word1
+Liis,Kask,IT,Pass1234
 ```
 
 ### ▶ CSV lugemine PowerShellis
@@ -179,24 +182,35 @@ $users
 
 ---
 
-## 8️⃣ Samm – Foreach tsükkel
+## 8️⃣ Samm – Foreach tsükkel ja kasutajate testimine CSV-st
 
 ### 💡 Miks?
 
-Et teha **sama tegevus iga CSV rea kohta**.
+Et teha **sama tegevus iga CSV rea kohta** ja testida, et andmeid saab lugeda.
 
-### ▶ Näide
+### ▶ Täielik testitav näide
 
 ```powershell
+# CSV lugemine
+$users = Import-Csv C:\Scripts\users.csv
+
+# Tsükkel iga rea kohta
 foreach ($user in $users) {
-    $user.FirstName
-    $user.LastName
+    # Näita kasutaja andmeid käsureal
+    Write-Host "Eesnimi: $($user.FirstName), Perekonnanimi: $($user.LastName), OU: $($user.OU), Parool: $($user.Password)"
 }
 ```
 
+### ✔ Mida see teeb?
+
+1. Loeb CSV-faili kõik read
+2. Läbib iga rea (`$user`)
+3. Väljastab käsureale iga kasutaja ees- ja perekonnanime, OU ja parooli
+4. Õpilane saab kontrollida, et **CSV andmed jõuavad õigesti PowerShelli**
+
 ---
 
-## 9️⃣ Samm – OU kontroll skriptis
+### 9️⃣ Samm – OU kontroll skriptis
 
 ### 💡 Miks?
 
@@ -209,8 +223,6 @@ Get-ADOrganizationalUnit `
   -Filter "Name -eq 'IT'" `
   -SearchBase "OU=KASUTAJAD,DC=TEST,DC=LOCAL"
 ```
-
----
 
 ## 🔟 Samm – Kasutaja loomine CSV-st
 

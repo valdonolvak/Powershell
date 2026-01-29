@@ -1,7 +1,5 @@
-Teeme nüüd **kogu ülesande algusest lõpuni korrektselt, puhtalt ja õppetööks sobivalt** 👌
-Struktuur on täpselt selline, nagu küsisid:
 
-1️⃣ **Õpiülesanne (kirjeldus tudengile)**
+1️⃣ **Õpiülesanne (kirjeldus õpilasele)**
 2️⃣ **CSV fail**
 
 ---
@@ -12,7 +10,7 @@ Struktuur on täpselt selline, nagu küsisid:
 
 ### 🎯 Ülesande eesmärk
 
-Õpi luua **Active Directory kasutajaid automaatselt** PowerShelli skripti abil, kasutades sisendandmetena CSV faili.
+Õpib looma **Active Directory kasutajaid automaatselt** PowerShelli skripti abil, kasutades sisendandmetena CSV faili.
 Ülesanne arendab oskusi:
 
 * AD kasutajate haldamisel
@@ -38,7 +36,7 @@ Koosta PowerShelli skript, mis:
 
 ### 🏗️ Nõuded
 
-* Domeen: `TEST.LOCAL`
+* Domeen: `TEST.LOCAL` 
   👉 *Iga õppija peab vajadusel muutma skriptis domeeni nime*
 * Peamine OU: **KASUTAJAD**
 * Alam-OU-d:
@@ -66,7 +64,7 @@ Koosta PowerShelli skript, mis:
 
 ---
 
-# 2️⃣ CSV FAIL
+# 2️⃣ CSV FAIL (failinimeks anda kasutajad.csv)
 
 ## Kasutajate andmed
 

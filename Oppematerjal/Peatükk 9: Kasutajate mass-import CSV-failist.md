@@ -1,109 +1,127 @@
-See on PowerShelli ja Active Directory halduse "meistriklass". Reaalses töökeskkonnas ei looda administraator 50 uut töötajat käsitsi, vaid impordib nad personaliüksuse saadetud tabelist. Selles peatükis õpime, kuidas siduda failihaldus, tsüklid ja AD käsud üheks võimsaks automaatikaks.
+# Peatükk 9: Kasutajate nutikas mass-import CSV-failist
 
----
+Selles peatükis õpime, kuidas luua professionaalne skript, mis suudab andmeid lugeda välisest failist, kontrollida süsteemi olekut ning jätta oma tegevustest maha korrektse logi.
 
-## Peatükk 9: Kasutajate mass-import CSV-failist
+### 1. CSV-faili struktuur
 
-### 1. CSV-faili ettevalmistus
+CSV on skripti "toit". Selleks, et PowerShell oskaks andmeid lugeda, peavad päised (First row) ühtima skriptis kasutatavate muutujatega.
 
-CSV (*Comma Separated Values*) on tekstifail, kus andmed on eraldatud komade või semikoolonitega. PowerShelli jaoks on CSV rida nagu **objekt** ja veeru pealkiri nagu **omadus**.
-
-**Näidis `kasutajad.csv` failist:**
+**Näidis `uued_tootajad.csv`:**
 
 ```csv
 Eesnimi,Perenimi,Kasutajatunnus,Osakond,Parool,Staatus
-Kati,Kask,kkask,IT,Tervitus2024!,True
-Mati,Mänd,mmand,Muuk,Suvi2024?,True
-Siim,Sikk,ssikk,Turundus,Saladus123,False
+Kati,Kask,kkask,IT,Tervitus2026!,True
+Mati,Mänd,mmand,Turundus,Kevad2026?,True
 
 ```
 
-### 2. CSV importimine: `Import-Csv`
+### 2. Kuidas lugeda CSV-faili rida-realt?
 
-Käsk `Import-Csv` loeb faili sisse ja muudab selle PowerShelli objektide massiiviks.
+Andmete importimiseks kasutame käsku `Import-Csv`. Selleks, et iga rida eraldi töödelda, kasutame `foreach` tsüklit. Tsükli sees tähistab muutuja (nt `$Rida`) parajasti käsil olevat rida.
 
-```powershell
-$andmed = Import-Csv -Path "C:\Temp\kasutajad.csv" -Delimiter ","
-
-```
-
-### 3. Paroolide töötlemine (SecureString)
-
-AD ei luba parooli sisestada tavalise tekstina. See peab olema konverteeritud turvaliseks sõneks (*SecureString*).
+**Koodinäide:**
 
 ```powershell
-$turvalineParool = ConvertTo-SecureString "TekstParool" -AsPlainText -Force
+# 1. Loeme kogu faili muutujasse
+$KasutajateNimekiri = Import-Csv -Path "C:\Temp\uued_tootajad.csv"
 
-```
-
----
-
-### Iseseisvad harjutused (CSV ja ettevalmistus)
-
-1. **Harjutus: CSV lugemine.** Loo ise tekstiredaktoriga (Notepad) 3-realine CSV fail ja kuva selle sisu PowerShellis tabelina (`Format-Table`).
-2. **Harjutus: Filtreerimine massiivist.** Kasuta `Import-Csv` ja `Where-Object`, et näha ainult neid inimesi, kes on CSV failis märgitud "IT" osakonda.
-3. **Harjutus: Tee testimine.** Koosta skript, mis kontrollib, kas sinu poolt määratud CSV fail üldse eksisteerib (`Test-Path`), enne kui üritab seda importida.
-4. **Harjutus: Dünaamiline OU tee.** Katseta koodirida, mis paneb kokku asukoha stringi: `"OU=$osakond,OU=CyberEstonia,DC=kool,DC=local"`.
-
----
-
-### 4. Skripti loogika: Kõik kokku
-
-Nüüd paneme kokku tsükli, parooli teisendamise ja kasutaja loomise õigesse asukohta.
-
-```powershell
-$kasutajad = Import-Csv "C:\Temp\kasutajad.csv"
-
-foreach ($rida in $kasutajad) {
-    # 1. Muudame parooli turvaliseks
-    $pw = ConvertTo-SecureString $rida.Parool -AsPlainText -Force
-    
-    # 2. Määrame dünaamiliselt OU vastavalt osakonnale
-    $targetOU = "OU=$($rida.Osakond),OU=CyberEstonia,DC=kool,DC=local"
-    
-    # 3. Loome kasutaja
-    New-ADUser -Name "$($rida.Eesnimi) $($rida.Perenimi)" `
-               -GivenName $rida.Eesnimi `
-               -Surname $rida.Perenimi `
-               -SamAccountName $rida.Kasutajatunnus `
-               -UserPrincipalName "$($rida.Kasutajatunnus)@kool.local" `
-               -Path $targetOU `
-               -AccountPassword $pw `
-               -Enabled ([bool]$rida.Staatus) `
-               -ChangePasswordAtLogon $true
+# 2. Töötleme iga rida eraldi
+foreach ($Rida in $KasutajateNimekiri) {
+    # Nüüd saame pöörduda veergude poole kasutades punkti (.)
+    Write-Host "Töötlen kasutajat: $($Rida.Eesnimi) $($Rida.Perenimi)"
+    Write-Host "Tema kasutajatunnus on: $($Rida.Kasutajatunnus)"
 }
 
 ```
 
+### 3. Kontroll: Kas OU on olemas?
+
+Enne kasutaja loomist peame veenduma, et sihtkoht (OU) eksisteerib. Kui ei eksisteeri, loome selle.
+
+**Koodinäide:**
+
+```powershell
+$OU_Tee = "OU=IT,DC=kool,DC=local"
+
+if (-not (Get-ADOrganizationalUnit -Filter "DistinguishedName -eq '$OU_Tee'")) {
+    New-ADOrganizationalUnit -Name "IT" -Path "DC=kool,DC=local"
+    Write-Host "OU loodi edukalt."
+}
+
+```
+
+### 4. Kontroll: Kas kasutaja on olemas?
+
+Selleks, et skript ei viskaks punast veateadet, kontrollime kasutajatunnust (`SamAccountName`).
+
+**Koodinäide:**
+
+```powershell
+$Tunnus = "kkask"
+
+if (-not (Get-ADUser -Filter "SamAccountName -eq '$Tunnus'")) {
+    # Siia tuleb kasutaja loomise käsk
+    Write-Host "Kasutajat pole, võime luua."
+} else {
+    Write-Host "Kasutaja on juba olemas, liigume edasi."
+}
+
+```
+
+### 5. Logimine: Kuidas kirjutada ajalugu?
+
+Logifaili kirjutamiseks kasutame `Add-Content` ja kellaaja jaoks `Get-Date`.
+
+**Koodinäide:**
+
+```powershell
+$Aeg = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+$LogiRida = "[$Aeg] LOODI KASUTAJA: kkask"
+Add-Content -Path "C:\Temp\import.log" -Value $LogiRida
+
+```
+
+### 6. Parool ja Staatus
+
+AD vajab parooli `SecureString` vormingus ja staatust `boolean` (tõeväärtus) tüübina.
+
+**Koodinäide:**
+
+```powershell
+$SecurePW = ConvertTo-SecureString "Tervitus2026!" -AsPlainText -Force
+$IsActive = [bool]"True"
+
+```
+
 ---
 
-### Iseseisev praktiline töö: "Suurettevõtte käivitus"
+### Iseseisvad harjutused õpilasele
 
-**Ülesanne:** Sulle on antud nimekiri 10 uue töötajaga. Pead nad kõik korraga süsteemi kandma, määrates neile paroolid ja õiged osakonnad.
+1. **Harjutus: Tsükli testimine.** Koosta CSV-fail kolme nimega. Kirjuta `foreach` tsükkel, mis väljastab iga nime kohta teate: "Kasutaja [Eesnimi] on impordiks valmis".
+2. **Harjutus: OU detektiiv.** Kirjuta `if-else` lause, mis kontrollib OU "Muuk" olemasolu. Kui see on olemas, kirjuta ekraanile "Konteiner leitud", kui mitte, siis "Konteiner puudu".
+3. **Harjutus: Veateate püüdmine.** Kasuta `Try-Catch` blokki koodis, mis üritab lugeda olematut faili. Kirjuta veateade faili `error.log`.
+4. **Harjutus: Kellaaja vorming.** Koosta muutuja, mis hoiab kellaaega vormingus "PP.KK.AAAA TT:MM" ja väljasta see ekraanile.
 
-**Töö käik ja nõuded:**
+---
 
-1. **CSV fail:** Loo fail `uued_tootajad.csv`. Lisa sinna vähemalt 5 inimest. Veergudeks peavad olema: `Firstname, Lastname, Username, Dept, Pass, IsActive`.
-2. **Skripti funktsionaalsus:**
-* Skript peab lugema andmed CSV failist.
-* Iga kasutaja puhul peab skript kontrollima, kas vastav osakonna OU (`OU=Dept...`) on olemas. Kui ei ole, peab skript selle looma.
-* Kasutaja tuleb luua vastavasse osakonna OU-sse.
-* Kasutaja peab olema aktiveeritud (`Enabled`) vastavalt CSV veeru `IsActive` väärtusele (vihje: kasuta tüübiteisendust `[bool]`).
+### Iseseisev praktiline töö: "Vigadeta Mass-import"
 
+**Ülesanne:** Koosta täielik skript, mis loeb `uued_tootajad.csv` faili ja teeb järgmist:
 
-3. **Logimine ja Try-Catch:**
-* Kasuta `Try-Catch` blokki `New-ADUser` ümber. Kui kasutaja loomine ebaõnnestub (nt kasutajanimi on juba võetud), siis logi viga faili `vead.log`.
-* Eduka loomise korral logi: "Kasutaja [Username] loodi edukalt asukohta [OU]".
+1. Käib `foreach` tsükliga läbi kõik CSV-faili read.
+2. Kontrollib ja loob vajadusel puuduva **OU**.
+3. Kontrollib, ega **kasutaja** pole juba AD-s olemas.
+4. Loob kasutaja õigesse OU-sse, määrab parooli ja staatuse.
+5. Kirjutab **iga õnnestumise ja vea** kohta logifaili `C:\Temp\import_raport.log` koos kuupäeva ja kellaajaga.
 
-
+```
 
 **Esitamiseks õpetajale:**
 
-1. Sinu koostatud `uued_tootajad.csv` fail.
-2. Täielik `.ps1` skriptifail.
-3. Screenshot Active Directory vaatest, kus on näha uued kasutajad erinevates osakondades.
-4. **Selgitus:** Miks on oluline kasutada CSV-s parameetrit `-Delimiter` (eraldaja), kui töötad erinevates regioonides (Eesti vs USA) loodud failidega?
+* Valmis skript `.ps1` failina.
+* Töö tulemusena tekkinud logifail.
+* Selgitus: Mis on `foreach ($Rida in $Kasutajad)` lause roll selles skriptis?
 
 ---
 
-**Nõuanne:** Kui CSV-st loetud `IsActive` väli on tekst "True", siis `New-ADUser` ei pruugi seda otse booleanina mõista. Kasuta alati `[bool]$rida.IsActive`.
+**Kas soovid, et lisaksime siia juurde ka näite, kuidas CSV-faili veerge ümber nimetada, kui personaliüksus saadab faili teistsuguste päistega?**

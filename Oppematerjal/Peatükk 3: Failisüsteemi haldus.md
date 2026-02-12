@@ -134,5 +134,3 @@ Kasuta testimiseks parameetrit **`-WhatIf`**, et näha, mida käsk teeks ilma se
 *Näide: `Remove-Item "C:\TähtisKaust" -Recurse -WhatIf*`
 
 ---
-
-**Kas liigume edasi Peatükk 4 juurde (Muutujad, massiivid ja tsüklid) või vajad veel abi mõne koodinäitega?**

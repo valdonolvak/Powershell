@@ -13,8 +13,43 @@ Muutuja on nagu "mälukarp", kuhu saad andmed hoiule panna, et neid hiljem kasut
 * **Objekti salvestamine:** Võid salvestada terve käsu väljundi muutujasse:
 `$teenused = Get-Service` (Nüüd on kõik teenused muutujas `$teenused`).
 
----
+**Koodinäide:**
 
+```powershell
+# Teksti salvestamine
+$nimi = "Juhan"
+
+# Arvu salvestamine ja arvutamine
+$a = 10
+$b = 5
+$summa = $a + $b
+
+# Objekti salvestamine (terve käsu väljund läheb muutujasse)
+$teenused = Get-Service
+
+```
+
+### 2. Massiivid (Arrays)
+
+Massiiv on muutuja, mis hoiab **mitut väärtust korraga**. See on nagu nimekiri.
+
+**Koodinäide:**
+
+```powershell
+# Massiivi loomine
+$it_osakond = "Tanel", "Igor", "Teet"
+
+# Liikme poole pöördumine (lugemine algab 0-st!)
+$it_osakond[0] # Väljastab: Tanel
+
+# Massiivi liikmete arv
+$it_osakond.Count # Väljastab: 3
+
+```
+
+
+
+ ----
 ### 2. Massiivid (Arrays)
 
 Massiiv on muutuja, mis hoiab **mitut väärtust korraga**. See on nagu nimekiri.

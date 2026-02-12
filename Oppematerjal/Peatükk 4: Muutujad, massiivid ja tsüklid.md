@@ -33,6 +33,12 @@ $teenused = Get-Service
 
 Massiiv on muutuja, mis hoiab **mitut väärtust korraga**. See on nagu nimekiri.
 
+* **Loomine:** `$numbrid = 1, 2, 3, 4, 5` või `$nimed = @("Anni", "Bert", "Cadi")`
+* **Elemendi poole pöördumine:** PowerShell alustab lugemist nullist!
+`$nimed[0]` on Anni.
+`$nimed[1]` on Bert.
+* **Mitu elementi on massiivis?** `$nimed.Count`
+
 **Koodinäide:**
 
 ```powershell
@@ -46,21 +52,6 @@ $it_osakond[0] # Väljastab: Tanel
 $it_osakond.Count # Väljastab: 3
 
 ```
-
-
-
- ----
-### 2. Massiivid (Arrays)
-
-Massiiv on muutuja, mis hoiab **mitut väärtust korraga**. See on nagu nimekiri.
-
-* **Loomine:** `$numbrid = 1, 2, 3, 4, 5` või `$nimed = @("Anni", "Bert", "Cadi")`
-* **Elemendi poole pöördumine:** PowerShell alustab lugemist nullist!
-`$nimed[0]` on Anni.
-`$nimed[1]` on Bert.
-* **Mitu elementi on massiivis?** `$nimed.Count`
-
----
 
 ### 3. Tsüklid (Loops) – Tegevuste kordamine
 

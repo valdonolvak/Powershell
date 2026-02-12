@@ -6,60 +6,72 @@ See peatükk on järg seitsmendale osale, kus õppisid Active Directory (AD) alu
 
 ### 1. Mis on OU ja miks see oluline on?
 
-OU on konteiner Active Directory sees. Erinevalt tavalistest kaustadest (nt *Users* või *Computers* konteinerid), saab OU-dele määrata:
+OU on konteiner Active Directory sees. Erinevalt tavalistest süsteemsetest kaustadest (nt *Users* konteiner), saab OU-dele määrata:
 
-* **Group Policy (GPO):** Rakendada seadeid ainult kindlale osakonnale.
-* **Delegation:** Anda kohalikule IT-spetsialistile õigus hallata ainult oma osakonna paroole.
+* **Group Policy (GPO):** Rakendada seadeid (nt ekraanilukk, tarkvara paigaldus) ainult kindlale osakonnale.
+* **Delegation:** Anda kohalikule IT-spetsialistile õigus hallata ainult oma osakonna paroole, ilma et ta saaks muuta kogu domeeni.
 
 ### 2. OU loomine: `New-ADOrganizationalUnit`
 
-OU loomisel on kõige olulisem määrata selle **Distinguished Name (DN)**, mis kirjeldab ära asukoha AD puus.
+OU loomisel on kõige olulisem määrata selle nimi ja asukoht AD puus (**Path**), mida kirjeldatakse *Distinguished Name* (DN) vormingus.
 
-**Struktuur:**
-`New-ADOrganizationalUnit -Name "OsakonnaNimi" -Path "OU=Parent,DC=domeen,DC=ee"`
-
-**Näide:** Loo OU nimega "Raamatupidamine" peakausta "Kasutajad" alla:
+**Koodinäide:**
 
 ```powershell
-New-ADOrganizationalUnit -Name "Raamatupidamine" -Path "OU=Kasutajad,DC=kool,DC=local" -ProtectedFromAccidentalDeletion $true
+# Loo OU nimega "Raamatupidamine" peakausta "CyberEstonia" alla
+New-ADOrganizationalUnit -Name "Raamatupidamine" `
+                         -Path "OU=CyberEstonia,DC=kool,DC=local" `
+                         -Description "Raamatupidamise osakonna kasutajad ja arvutid" `
+                         -ProtectedFromAccidentalDeletion $true
 
 ```
 
-> **Märkus:** `-ProtectedFromAccidentalDeletion $true` on PowerShelli "turvavöö" – see takistab OU juhuslikku kustutamist.
+> **Märkus:** Parameeter `-ProtectedFromAccidentalDeletion $true` on PowerShelli "turvavöö". See takistab OU juhuslikku kustutamist (isegi `Delete` klahviga ADUC-is).
 
 ### 3. OU-de leidmine ja muutmine
 
-* `Get-ADOrganizationalUnit -Filter *` – Kuvab kõik domeeni OU-d.
-* `Set-ADOrganizationalUnit` – Võimaldab muuta nime või asukohta.
-* `Remove-ADOrganizationalUnit` – Kustutab üksuse (eeldab, et kaitse on maha võetud).
+* **`Get-ADOrganizationalUnit`**: Kuvab olemasolevad OU-d.
+* **`Set-ADOrganizationalUnit`**: Muudab atribuute (nt kirjeldust või kustutamiskaitset).
+* **`Remove-ADOrganizationalUnit`**: Kustutab üksuse.
 
----
+**Koodinäide (Kaitse eemaldamine ja kustutamine):**
 
-### Iseseisvad harjutused (Struktuuri harjutamine)
+```powershell
+# 1. Võtame kaitse maha
+Set-ADOrganizationalUnit -Identity "OU=Test_Labor,DC=kool,DC=local" -ProtectedFromAccidentalDeletion $false
 
-1. **Harjutus: Üksiku OU loomine.** Loo oma domeeni juurkataloogi uus OU nimega `Test_Labor`.
-2. **Harjutus: Alam-OU-d.** Loo eelmises harjutuses loodud `Test_Labor` sisse kaks alam-OU-d: `Kasutajad` ja `Arvutid`.
-3. **Harjutus: Kirjelduse lisamine.** Muuda `Test_Labor` kirjeldust (`Description`) ja lisa sinna tekst: "Loodud õppetöö käigus [SinuNimi] poolt".
-4. **Harjutus: Kaitse eemaldamine.** Uuri käsku `Set-ADOrganizationalUnit` ja leia parameeter, millega lülitada välja kogemata kustutamise kaitse (`ProtectedFromAccidentalDeletion`).
+# 2. Kustutame OU
+Remove-ADOrganizationalUnit -Identity "OU=Test_Labor,DC=kool,DC=local" -Confirm:$false
 
----
+```
 
-### 4. Automatiseerimine: Mass-loomine massiivist
+### 4. Automatiseerimine: Struktuuride loomine massiivist
 
 Reaalses elus luuakse tihti terveid struktuure korraga. Siin tulevad appi eelmistes peatükkides õpitud massiivid ja tsüklid.
 
-**Näide: Mitme osakonna loomine korraga:**
+**Koodinäide (Osakondade mass-loomine):**
 
 ```powershell
-$osakonnad = "IT", "Turundus", "Muük", "Juhtkond"
-foreach ($osakond in $osakonnad) {
-    New-ADOrganizationalUnit -Name $osakond -Path "DC=kool,DC=local"
+$Osakonnad = "IT", "Turundus", "Muuk", "Juhtkond"
+$ParentPath = "DC=kool,DC=local"
+
+foreach ($Osakond in $Osakonnad) {
+    New-ADOrganizationalUnit -Name $Osakond -Path $ParentPath
+    Write-Host "Loodi osakond: $Osakond" -ForegroundColor Cyan
 }
 
 ```
 
 ---
 
+### Iseseisvad harjutused (Struktuuri harjutamine)
+
+1. **Harjutus: Üksiku OU loomine.** Loo domeeni juurkataloogi uus OU nimega `Labor_Haldus`.
+2. **Harjutus: Alam-OU-d.** Loo eelmises harjutuses loodud `Labor_Haldus` sisse kaks alam-OU-d: `Kasutajad` ja `Arvutid`.
+3. **Harjutus: Kirjelduse lisamine.** Muuda OU `Labor_Haldus` kirjeldust (`Description`) ja lisa sinna tekst: "Loodud õppetöö käigus [SinuNimi] poolt".
+4. **Harjutus: Otsing.** Leia käsk, mis kuvab kõik sinu domeenis olevad OU-d, mille nimes sisaldub sõna "Labor".
+
+---
 ### Iseseisev praktiline töö: "Ettevõtte IT-arhitektuur"
 
 **Ülesanne:** Sinu ülesandeks on luua uue ettevõtte "CyberEstonia" AD struktuur, kasutades ainult PowerShelli skripti.

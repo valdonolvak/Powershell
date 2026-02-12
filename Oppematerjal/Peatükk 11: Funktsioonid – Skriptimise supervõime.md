@@ -4,7 +4,7 @@ Funktsioonid teevad sinu koodi puhtaks, korduvkasutatavaks ja professionaalseks.
 
 ---
 
-# Peatükk 10: Funktsioonid – Skriptimise supervõime
+# Peatükk 11: Funktsioonid – Skriptimise supervõime
 
 ### 1. Mis on funktsioon ja miks seda vaja on?
 

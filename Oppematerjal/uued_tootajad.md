@@ -1,3 +1,7 @@
+
+#### 1. CSV faili sisu (uued_tootajad.csv)
+
+```csv
 Eesnimi,Perenimi,Kasutajatunnus,Osakond,Parool,Staatus
 Jaan,Tamm,jaan.tamm,OPETAJAD,Passw0rd!,True
 Mari,Kask,mari.kask,OPETAJAD,Passw0rd!,True
@@ -49,3 +53,5 @@ Nelli,Nool,nelli.nool,TOOTAJAD,Passw0rd!,True
 Olev,Ots,olev.ots,TOOTAJAD,Passw0rd!,True
 Paul,Puur,paul.puur,TOOTAJAD,Passw0rd!,True
 Raimo,Rull,raimo.rull,TOOTAJAD,Passw0rd!,True
+
+```

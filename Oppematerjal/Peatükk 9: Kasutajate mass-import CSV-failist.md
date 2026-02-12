@@ -50,6 +50,20 @@ if (-not (Get-ADOrganizationalUnit -Filter "DistinguishedName -eq '$OU_Tee'")) {
 
 ```
 
+**Koodinäide OU loomisel:**
+
+```powershell
+# Dünaamiline tee koostamine
+$SihtOU = "OU=$($Rida.Osakond),OU=KASUTAJAD,DC=kool,DC=local"
+
+if (-not (Get-ADOrganizationalUnit -Filter "DistinguishedName -eq '$SihtOU'")) {
+    # Kui alam-OU-d pole, loome selle
+    New-ADOrganizationalUnit -Name $Rida.Osakond -Path "OU=KASUTAJAD,DC=kool,DC=local"
+}
+
+```
+
+
 ### 4. Kontroll: Kas kasutaja on olemas?
 
 Selleks, et skript ei viskaks punast veateadet, kontrollime kasutajatunnust (`SamAccountName`).
@@ -68,15 +82,16 @@ if (-not (Get-ADUser -Filter "SamAccountName -eq '$Tunnus'")) {
 
 ```
 
-### 5. Logimine: Kuidas kirjutada ajalugu?
 
-Logifaili kirjutamiseks kasutame `Add-Content` ja kellaaja jaoks `Get-Date`.
+### 4. Logimine: Kuidas kirjutada ajalugu?
+
+Administraator peab teadma, mis kell ja mida tehti. Logifaili kirjutamiseks kasutame `Add-Content`.
 
 **Koodinäide:**
 
 ```powershell
 $Aeg = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$LogiRida = "[$Aeg] LOODI KASUTAJA: kkask"
+$LogiRida = "[$Aeg] EDUKAS: Kasutaja $($Rida.Kasutajatunnus) loodi."
 Add-Content -Path "C:\Temp\import.log" -Value $LogiRida
 
 ```

@@ -129,7 +129,6 @@ $IsActive = [bool]"True"
 4. Loob kasutaja õigesse OU-sse, määrab parooli ja staatuse.
 5. Kirjutab **iga õnnestumise ja vea** kohta logifaili `C:\Temp\import_raport.log` koos kuupäeva ja kellaajaga.
 
-```
 
 **Esitamiseks õpetajale:**
 
@@ -139,4 +138,3 @@ $IsActive = [bool]"True"
 
 ---
 
-**Kas soovid, et lisaksime siia juurde ka näite, kuidas CSV-faili veerge ümber nimetada, kui personaliüksus saadab faili teistsuguste päistega?**

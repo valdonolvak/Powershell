@@ -47,6 +47,16 @@ Administraator peab teadma, mis juhtus siis, kui ta ekraani ei vaadanud. Logimin
 * **Lihtne logi:** `Add-Content -Path "logi.txt" -Value "Skript käivitus kell $(Get-Date)"`
 * **Tee seda alati:** Lisa igale olulisele sammule logikirje, et hiljem oleks võimalik probleeme diagnoosida.
 
+**Koodinäide:**
+
+```powershell
+$LogiFail = "C:\Temp\skripti_logi.txt"
+$Aeg = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+
+# Kirjutame logisse teate
+Add-Content -Path $LogiFail -Value "[$Aeg] INFO: Skript käivitus edukalt."
+
+```
 ---
 
 ### Iseseisvad harjutused (Skriptimine ja vead)

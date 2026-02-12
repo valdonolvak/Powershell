@@ -1,4 +1,3 @@
-Vabandust, et eelmine vastus ei olnud piisavalt põhjalik. Siin on nüüd **Peatükk 6** täielik ja terviklik materjal, kuhu on kokku põimitud mõlema teksti parimad osad, koodinäited ja harjutused.
 
 ---
 
